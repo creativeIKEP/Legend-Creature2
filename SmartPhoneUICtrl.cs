@@ -2,26 +2,47 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class SmartPhoneUICtrl : MonoBehaviour {
     PlayerMove playerMove;
     PlayerAttack playerAttack;
     InputAttack.InputAttackCheacck inputAttackCheacck;
+    FollowCamera followCamera;
     Vector2 prevPosition;
     Vector2 delta = Vector2.zero;
     bool moved = false;
     int touchCount = 0;
+    int scrollTouchIndex = 0;
+
+    int scrollButtonTouchCount = 0;
 
 	// Use this for initialization
 	void Start () {
         playerMove = FindObjectOfType<PlayerMove>();
         playerAttack = FindObjectOfType<PlayerAttack>();
         inputAttackCheacck = FindObjectOfType<InputAttack.InputAttackCheacck>();
+        followCamera = FindObjectOfType<FollowCamera>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
         if (!moved) { delta = Vector2.zero; }
+
+        if(scrollButtonTouchCount>=2){
+            // 両方のタッチを格納します
+            Touch touchZero = Input.GetTouch(0);
+            Touch touchOne = Input.GetTouch(1);
+            // 各タッチの前フレームでの位置をもとめます
+            Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+            Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+            // 各フレームのタッチ間のベクター (距離) の大きさをもとめます
+            float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+            float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+            // 各フレーム間の距離の差をもとめます
+            float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
+            followCamera.Zoom(deltaMagnitudeDiff/100);
+        }
 	}
 
     public bool Clicked()
@@ -44,58 +65,18 @@ public class SmartPhoneUICtrl : MonoBehaviour {
         return moved;
     }
 
-    public Vector2 GetCursorPosition()
-    {
-        return Input.mousePosition;
-    }
-
-
     public void JoyStickEnter(){
-        touchCount++;
+        //touchCount++;
     }
     public void JoyStickExit(){
-        touchCount--;
+        //touchCount--;
     }
 
-    //public void ForwardButton(){
-    //    playerMove.ForwardMove();
-    //}
-    //public void BackButton()
-    //{
-    //    playerMove.BackMove();
-    //}
-    //public void LeftButton()
-    //{
-    //    playerMove.LeftMove();
-    //}
-    //public void RightButton()
-    //{
-    //    playerMove.RightMove();
-    //}
-
-    //public void ForwardButtonUp()
-    //{
-    //    playerMove.ForwardMoveStop();
-    //}
-    //public void BackButtonUp()
-    //{
-    //    playerMove.BackMoveStop();
-    //}
-    //public void LeftButtonUp()
-    //{
-    //    playerMove.LeftMoveStop();
-    //}
-    //public void RightButtonUp()
-    //{
-    //    playerMove.RightMoveStop();
-    //}
     public void DashButton(){
         playerMove.DushMove();
-        touchCount++;
     }
     public void DashMoveStop(){
         playerMove.DushMoveStop();
-        touchCount--;
     }
 
     public void AttackButton(){
@@ -107,29 +88,48 @@ public class SmartPhoneUICtrl : MonoBehaviour {
         playerMove.AvoidOn();
     }
 
+    public void TouchPinchArea(){
+        scrollButtonTouchCount++;
+    }
+
     public void ScrollButtonDown(){
-        if (Input.touchCount == touchCount + 2)
-        {
-            
-        }
-        else if (Input.touchCount == touchCount + 1)
-        {
-            prevPosition = GetCursorPosition();
-        }
+        scrollTouchIndex=Input.touches.Length - 1;
+        prevPosition = GetScrollButtonTouchPosition();
     }
     public void ScrollButton()
     {
-        delta = GetCursorPosition() - prevPosition;
-        prevPosition = GetCursorPosition();
+        delta = GetScrollButtonTouchPosition()-prevPosition;
+        prevPosition = GetScrollButtonTouchPosition();
         moved = true;
     }
     public void ScrollButtonUp()
     {
-        prevPosition = GetCursorPosition();
         moved = false;
+        scrollButtonTouchCount--;
+        if (scrollButtonTouchCount < 0) scrollButtonTouchCount = 0;
     }
 
     public void JumpButton(){
         playerMove.Jump();
+    }
+
+    Vector2 GetScrollButtonTouchPosition(){
+        Vector2 result=Vector2.zero;
+        if(Input.touchCount>0){
+            Touch[] myTouches = Input.touches;
+
+            int diff = myTouches.Length - touchCount;
+            touchCount = Input.touchCount;
+            if(diff<0){
+                for (int i = 0; i < scrollTouchIndex; i++){
+                    if(myTouches[i].phase == TouchPhase.Ended){
+                        scrollTouchIndex -= 1;
+                    }
+                }
+                result = myTouches[scrollTouchIndex].position;
+            }
+            else result = myTouches[scrollTouchIndex].position;
+        }
+        return result;
     }
 }
