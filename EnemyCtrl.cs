@@ -79,7 +79,7 @@ public class EnemyCtrl : MonoBehaviour {
 
     void Walk(){
         Vector3 enemyPos = new Vector3(transform.position.x, 0, transform.position.z);
-        print(Vector3.Distance(enemyPos, preEnemyPos));
+        //print(Vector3.Distance(enemyPos, preEnemyPos));
         //Vector3 moveTargetPos = new Vector3(moveTarget.position.x, 0, moveTarget.position.z);
         //Debug.Log(Vector3.Distance(moveTarget.position, enemyPos));
         if(Vector3.Distance(moveTarget.position, enemyPos)<=1.0f || (((Vector3.Distance(enemyPos, preEnemyPos))<stopJudgeDis)&&time>5.0f)){
@@ -206,17 +206,17 @@ public class EnemyCtrl : MonoBehaviour {
     }
 
     public void StartAttack(){
-        Debug.Log("startAttack");
+        //Debug.Log("startAttack");
         enemyaAttackArea.OnAttack();
     }
     public void EndAttack()
     {
-        Debug.Log("EndAttack");
+        //Debug.Log("EndAttack");
         enemyaAttackArea.OnAttackTermination();
         enemyaAttackArea.hitEffect.SetActive(false);
     }
     public void EndAttack2(){
-        Debug.Log("EndAttack2");
+        //Debug.Log("EndAttack2");
         attackKey = true;
         agent.SetDestination(transform.position + transform.forward * dis + transform.right * 5);
         transform.LookAt(transform.position + transform.forward * dis + transform.right * 5);

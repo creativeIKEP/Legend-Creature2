@@ -124,10 +124,13 @@ public class PlayerMove : MonoBehaviour {
 
             if (avoid && direction != Vector3.zero)
             {
-                if (forward) { direction = m_Cam.forward.normalized; }
-                else if (back) { direction = -m_Cam.forward.normalized;}
-                else if (left) { direction = -m_Cam.right.normalized; }
-                else if (right) { direction = m_Cam.right.normalized; }
+                if (!joyStick)
+                {
+                    if (forward) { direction = m_Cam.forward.normalized; }
+                    else if (back) { direction = -m_Cam.forward.normalized; }
+                    else if (left) { direction = -m_Cam.right.normalized; }
+                    else if (right) { direction = m_Cam.right.normalized; }
+                }
                 velocity = direction * walkSpeed;
                 velocity.y = 0;
                 rotationSpeed = float.MaxValue;

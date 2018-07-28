@@ -103,6 +103,10 @@ public class SmartPhoneUICtrl : MonoBehaviour {
         StartCoroutine(inputAttackCheacck.Attack());
     }
 
+    public void AvoidButton(){
+        playerMove.AvoidOn();
+    }
+
     public void ScrollButtonDown(){
         if (Input.touchCount == touchCount + 2)
         {
