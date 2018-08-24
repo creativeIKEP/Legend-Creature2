@@ -55,7 +55,7 @@ public class GenerateEnemy : MonoBehaviour {
         firstPos.transform.position = new Vector3(x, 0, z);
         enemys[i].GetComponent<EnemyCtrl>().firstPoint = firstPos.transform;
         float y = Terrain.activeTerrain.terrainData.GetInterpolatedHeight(x / Terrain.activeTerrain.terrainData.size.x, z / Terrain.activeTerrain.terrainData.size.z);  //get terrain's height with x and z pos
-
         enemysContrl[i] = Instantiate(enemys[i], new Vector3(x, y, z), Quaternion.identity);
+
     }
 }
