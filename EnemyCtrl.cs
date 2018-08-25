@@ -31,6 +31,8 @@ public class EnemyCtrl : MonoBehaviour {
     float stopJudgeDis = 0.01f;
     bool isMove = true;
 
+    Vector3 preAttackPos;
+    float time2;
 
     enum State{
         idle,
@@ -55,11 +57,16 @@ public class EnemyCtrl : MonoBehaviour {
         enemyaAttackArea = GetComponentInChildren<EnemyaAttackArea>();
         player = GameObject.FindWithTag("Player");
         preEnemyPos = new Vector3(transform.position.x-5.0f, 0, transform.position.z);
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (!agent.isOnNavMesh) { Destroy(firstPoint.gameObject); Destroy(gameObject); }
+        if (!agent.isOnNavMesh) { 
+            Destroy(firstPoint.gameObject); 
+            Destroy(gameObject); 
+            Instantiate((Resources.Load("ErrorAlert") as GameObject), transform.position, Quaternion.identity);
+        }
         
         if (state == State.walk) { Walk(); }
         else if (state == State.idle) { Idle(); }
@@ -72,7 +79,7 @@ public class EnemyCtrl : MonoBehaviour {
             if (nextState == State.walk) { state = nextState; }
             else if (nextState == State.idle) { state = nextState; }
             else if (nextState == State.chase) { state = nextState; }
-            else if (nextState == State.attack) { state = nextState; }
+            else if (nextState == State.attack) { state = nextState; preAttackPos = transform.position; }
             else { Die(); }
         }
 
@@ -152,10 +159,19 @@ public class EnemyCtrl : MonoBehaviour {
 
     void Attack(){
         animator.SetBool("Idle", false);
+
+        if (attackStatus == 2 && (Vector3.Distance(transform.position, preAttackPos) < 0.1f))
+        {
+            time2 += Time.deltaTime;
+            if (time2 >= 5.0f) { Destroy(gameObject); Instantiate((Resources.Load("ErrorAlert") as GameObject), transform.position, Quaternion.identity); }
+        }
+        else { time2 = 0; }
+        preAttackPos = transform.position;
+
         if(attackStatus==0){    //playerと距離があるなら近づく
             agent.SetDestination(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z));
             transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z));
-            Vector3 destination = new Vector3(agent.destination.x, transform.position.y, agent.destination.z);
+            Vector3 destination = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
             if (Vector3.Distance(transform.position, destination) <= attackDistance)   //playerの近くにきたら
             {
                 //AttackPosition = true;
@@ -168,7 +184,7 @@ public class EnemyCtrl : MonoBehaviour {
             moveTarget.position = transform.position + transform.forward * dis + transform.right * 5;
         }
         else if(attackStatus==2){
-            Vector3 destination = new Vector3(agent.destination.x, transform.position.y, agent.destination.z);
+            Vector3 destination = new Vector3(moveTarget.position.x, transform.position.y, moveTarget.position.z);
             if (Vector3.Distance(transform.position, destination) <= 1.0f)
             {
                 //AttackPosition = false;
@@ -216,6 +232,7 @@ public class EnemyCtrl : MonoBehaviour {
     public void StartAttack(){
         //Debug.Log("startAttack");
         enemyaAttackArea.OnAttack();
+        transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z));
     }
     public void EndAttack()
     {

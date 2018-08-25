@@ -30,6 +30,7 @@ public class EnemyStatus : MonoBehaviour {
         HP -= damage;
         if(HP<=0){
             //死亡
+            agent.Stop();
             if (isDie == true) return;
             isDie = true;
             agent.SetDestination(transform.position);
